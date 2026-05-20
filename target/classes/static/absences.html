@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nieobecności – Kalkulator Płacowy</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="d-flex">
+  <div class="sidebar d-none d-md-block" style="width:220px;min-width:220px">
+    <div class="px-3 pb-3 fw-bold fs-6 border-bottom border-white border-opacity-25 mb-2">
+      💼 Kalkulator Płacowy
+    </div>
+    <span class="nav-section">Pracodawca</span>
+    <a href="employer-dashboard.html">🏠 Pulpit</a>
+    <a href="employees.html">👥 Pracownicy</a>
+    <a href="payslip-form.html">📄 Generuj pasek</a>
+    <a href="absences.html" class="active">📅 Nieobecności</a>
+    <div class="mt-auto p-3" style="position:absolute;bottom:0;width:220px">
+      <button onclick="logout()" class="btn btn-outline-light btn-sm w-100">Wyloguj</button>
+    </div>
+  </div>
+
+  <div class="flex-grow-1 p-4">
+    <h4 class="mb-4">Zarządzanie nieobecnościami</h4>
+    <div id="alertBox" class="alert d-none"></div>
+
+    <!-- Formularz dodawania -->
+    <div class="card p-4 mb-4">
+      <h6 class="mb-3">Dodaj nieobecność</h6>
+      <form id="absenceForm">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Pracownik *</label>
+            <select id="empSelect" class="form-select" required></select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Typ *</label>
+            <select id="absType" class="form-select" required>
+              <option value="SICK_LEAVE">L4 (zwolnienie lekarskie)</option>
+              <option value="PAID_LEAVE">Urlop płatny</option>
+              <option value="UNPAID_LEAVE">Urlop bezpłatny</option>
+              <option value="MATERNITY">Urlop macierzyński</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Od *</label>
+            <input type="date" id="dateFrom" class="form-control" required>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Do *</label>
+            <input type="date" id="dateTo" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Notatka</label>
+            <input type="text" id="note" class="form-control" placeholder="np. numer L4">
+          </div>
+        </div>
+        <div class="mt-3">
+          <button type="submit" class="btn btn-primary btn-sm">Dodaj nieobecność</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Lista -->
+    <div class="card p-3 mb-3">
+      <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label small">Filtruj pracownika</label>
+          <select id="filterEmp" class="form-select form-select-sm"></select>
+        </div>
+        <div class="col-auto">
+          <button onclick="loadAbsences()" class="btn btn-primary btn-sm">Filtruj</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <table class="table table-hover mb-0">
+        <thead class="table-dark">
+          <tr><th>Pracownik</th><th>Typ</th><th>Od</th><th>Do</th><th>Dni rob.</th><th>Notatka</th><th></th></tr>
+        </thead>
+        <tbody id="absenceList">
+          <tr><td colspan="7" class="text-center text-muted py-4">Ładowanie...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="js/auth.js"></script>
+<script src="js/absences.js"></script>
+<script>
+(async () => {
+  const user = await requireAuth('EMPLOYER');
+  if (!user) return;
+
+  const res = await fetch('/api/v1/employees', { credentials: 'include' });
+  const employees = res.ok ? await res.json() : [];
+
+  ['empSelect','filterEmp'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (id === 'filterEmp') sel.innerHTML = '<option value="">-- wszyscy --</option>';
+    employees.forEach(e => {
+      const opt = new Option(`${e.lastName} ${e.firstName}`, e.id);
+      sel.add(opt.cloneNode(true));
+    });
+  });
+
+  window._employees = employees;
+  await loadAbsences();
+
+  document.getElementById('absenceForm').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const body = {
+      employeeId: parseInt(document.getElementById('empSelect').value),
+      type:       document.getElementById('absType').value,
+      dateFrom:   document.getElementById('dateFrom').value,
+      dateTo:     document.getElementById('dateTo').value,
+      note:       document.getElementById('note').value || null
+    };
+    const r = await fetch('/api/v1/absences', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      credentials: 'include'
+    });
+    if (r.ok) {
+      ev.target.reset();
+      await loadAbsences();
+    } else {
+      const err = await r.json().catch(() => ({}));
+      const ab = document.getElementById('alertBox');
+      ab.textContent = err.error || 'Błąd';
+      ab.className = 'alert alert-danger';
+    }
+  });
+})();
+</script>
+</body>
+</html>
