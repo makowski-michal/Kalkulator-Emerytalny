@@ -1,0 +1,101 @@
+:root {
+  --primary: #1A5276;
+  --primary-light: #2980B9;
+  --success: #1E8449;
+  --bg: #F4F6F7;
+  --text: #2C3E50;
+  --border: #D5D8DC;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Sidebar / topbar */
+.navbar-brand { font-weight: 700; letter-spacing: .5px; }
+
+.sidebar {
+  min-height: 100vh;
+  background: var(--primary);
+  color: #fff;
+  padding-top: 1rem;
+}
+.sidebar a {
+  color: rgba(255,255,255,.85);
+  display: block;
+  padding: .55rem 1.2rem;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background .15s;
+}
+.sidebar a:hover, .sidebar a.active {
+  background: rgba(255,255,255,.18);
+  color: #fff;
+}
+.sidebar .nav-section {
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,.5);
+  padding: .9rem 1.2rem .3rem;
+}
+
+/* Cards */
+.card { border: none; box-shadow: 0 1px 6px rgba(0,0,0,.08); }
+.card-header-primary {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Payslip detail */
+.payslip-section-header {
+  background: var(--primary);
+  color: #fff;
+  font-size: .85rem;
+  font-weight: 600;
+  padding: .4rem .8rem;
+}
+.payslip-row {
+  display: flex;
+  justify-content: space-between;
+  padding: .35rem .8rem;
+  border-bottom: 1px solid var(--border);
+}
+.payslip-row:last-child { border-bottom: none; }
+.payslip-net {
+  background: #EAF4EC;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--success);
+}
+
+/* Tables */
+.table-hover tbody tr:hover { background: #EBF5FB; }
+
+/* Login */
+.login-card {
+  max-width: 420px;
+  margin: 8vh auto;
+}
+.login-logo {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--primary);
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Charts */
+#retirementChart { max-height: 320px; }
+
+/* Badges */
+.badge-employer { background: var(--primary); }
+.badge-employee { background: var(--success); }
+
+/* Responsive helpers */
+@media (max-width: 768px) {
+  .sidebar { min-height: auto; }
+}
